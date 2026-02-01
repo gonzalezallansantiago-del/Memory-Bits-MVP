@@ -103,10 +103,10 @@
   <script>
     const codeUsed = sessionStorage.getItem("memoryBitCode");
 
-    if (!codeUsed) {
-      document.getElementById("error").textContent =
-        "No se encontró un código válido.";
-    }
+if (!codeUsed) {
+  // 🔐 Sin código no se puede crear
+  window.location.href = "create-code.html";
+}
 
     function generatePublicId() {
       return Math.random().toString(36).substring(2, 10);
