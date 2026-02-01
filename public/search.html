@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buscar Memory Bits</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      width: 90%;
+      max-width: 520px;
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      margin-top: 40px;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+
+    .result {
+      padding: 14px;
+      border-radius: 12px;
+      background: #f1f1f1;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+
+    .result-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .result-snippet {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .empty {
+      text-align: center;
+      color: #777;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Buscar Memory Bits</h1>
+
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Buscar por título..."
+    />
+
+    <div id="results"></div>
+  </div>
+
+  <script>
+    const input = document.getElementById("searchInput");
+    const resultsDiv = document.getElementById("results");
+
+    let timeout = null;
+
+    input.addEventListener("input", () => {
+      clearTimeout(timeout);
+
+      const query = input.value.trim();
+
+      if (!query) {
+        resultsDiv.innerHTML = "";
+        return;
+      }
+
+      timeout = setTimeout(() => {
+        fetch(`/api/memory-bits/search?q=${encodeURIComponent(query)}`)
+          .then(res => res.json())
+          .then(data => {
+            resultsDiv.innerHTML = "";
+
+            if (!data.length) {
+              resultsDiv.innerHTML =
+                `<div class="empty">No se encontraron resultados</div>`;
+              return;
+            }
+
+            data.forEach(bit => {
+              const div = document.createElement("div");
+              div.className = "result";
+              div.onclick = () => {
+                window.location.href = `/${bit.publicId}`;
+              };
+
+              div.innerHTML = `
+                <div class="result-title">${bit.title}</div>
+                <div class="result-snippet">
+                  ${bit.content.slice(0, 80)}...
+                </div>
+              `;
+
+              resultsDiv.appendChild(div);
+            });
+          })
+          .catch(() => {
+            resultsDiv.innerHTML =
+              `<div class="empty">Error al buscar</div>`;
+          });
+      }, 400); // debounce
+    });
+  </script>
+
+</body>
+</html>
