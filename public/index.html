@@ -125,7 +125,7 @@
       throw new Error("No publicId");
     }
 
-    fetch(`http://localhost:3000/api/memory-bits/${publicId}`)
+    fetch(`/api/memory-bits/${publicId}`)
       .then(res => {
         if (!res.ok) throw new Error("No encontrada");
         return res.json();
