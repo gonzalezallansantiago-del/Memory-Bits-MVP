@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Memory Bit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Librería QR -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+  <style>
+    /* ===== RESET ===== */
+    * {
+      box-sizing: border-box;
+    }
+
+    /* ===== BASE (iOS) ===== */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f2f2f7;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                   "SF Pro Display", system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #1c1c1e;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+      background: #ffffff;
+      width: 92%;
+      max-width: 420px;
+      padding: 28px 24px;
+      border-radius: 20px;
+      box-shadow:
+        0 4px 12px rgba(0,0,0,0.05),
+        0 20px 40px rgba(0,0,0,0.08);
+      text-align: left;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    /* ===== TITLE ===== */
+    h1 {
+      margin: 0 0 16px 0;
+      font-size: 22px;
+      font-weight: 600;
+      color: #000000;
+    }
+
+    /* ===== CONTENT ===== */
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    /* ===== ERROR ===== */
+    .error {
+      color: #ff3b30;
+      margin-top: 12px;
+    }
+
+    /* ===== QR ===== */
+    #qr {
+      margin-top: 28px;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ===== BUTTON (iOS) ===== */
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      background: #007aff;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    button:active {
+      background: #005fd1;
+    }
+
+    /* ===== ANIMATION ===== */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1 id="title">Cargando…</h1>
+    <p id="content"></p>
+    <p id="error" class="error"></p>
+
+    <div id="qr"></div>
+
+    <button id="downloadQR" style="display:none;">
+      Descargar QR
+    </button>
+  </div>
+
+  <script>
+    const publicId = window.location.pathname.replace("/", "");
+
+    if (!publicId) {
+      document.getElementById("error").textContent =
+        "No se proporcionó un Memory Bit.";
+      throw new Error("No publicId");
+    }
+
+    fetch(`http://localhost:3000/api/memory-bits/${publicId}`)
+      .then(res => {
+        if (!res.ok) throw new Error("No encontrada");
+        return res.json();
+      })
+      .then(data => {
+        document.getElementById("title").textContent = data.title;
+        document.getElementById("content").textContent = data.content;
+
+        // 🎨 Color SOLO para el cuerpo del texto
+        document.getElementById("content").style.color =
+          data.textColor || "black";
+
+        const url = `${window.location.origin}/${data.publicId}`;
+
+        const qrContainer = document.getElementById("qr");
+        qrContainer.innerHTML = "";
+
+        const canvas = document.createElement("canvas");
+
+        QRCode.toCanvas(canvas, url, { width: 200 }, (err) => {
+          if (err) return;
+
+          qrContainer.appendChild(canvas);
+
+          const btn = document.getElementById("downloadQR");
+          btn.style.display = "block";
+
+          btn.onclick = () => {
+            const link = document.createElement("a");
+            link.download = `memory-bit-${data.publicId}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+          };
+        });
+      })
+      .catch(() => {
+        document.getElementById("error").textContent =
+          "Memory Bit no encontrada.";
+        document.getElementById("title").textContent = "Error";
+      });
+  </script>
+
+</body>
+</html>

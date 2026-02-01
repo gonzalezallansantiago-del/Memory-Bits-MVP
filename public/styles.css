@@ -1,0 +1,90 @@
+/* ===== RESET ===== */
+* {
+  box-sizing: border-box;
+}
+
+/* ===== BASE ===== */
+body {
+  margin: 0;
+  padding: 0;
+  background: #f2f2f7;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+               "SF Pro Display", system-ui, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #1c1c1e;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: #ffffff;
+  width: 92%;
+  max-width: 420px;
+  padding: 28px 24px;
+  border-radius: 20px;
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.05),
+    0 20px 40px rgba(0,0,0,0.08);
+  text-align: left;
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ===== TITLE ===== */
+#title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: #000000;
+}
+
+/* ===== CONTENT ===== */
+#content {
+  font-size: 16px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* ===== ERROR ===== */
+.error {
+  color: #ff3b30;
+  margin-top: 12px;
+}
+
+/* ===== QR ===== */
+#qr {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===== BUTTON ===== */
+button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: #007aff;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+button:active {
+  background: #005fd1;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

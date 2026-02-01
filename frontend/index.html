@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Memory Bit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: white;
+      width: 90%;
+      max-width: 420px;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1 id="title">Cargando…</h1>
+    <p id="content"></p>
+    <p id="error" class="error"></p>
+  </div>
+
+  <script>
+    // 1. Obtener el publicId desde la URL
+    // Ejemplo: index.html?bit=532ffb0010c2e757
+    const params = new URLSearchParams(window.location.search);
+    const publicId = params.get("bit");
+
+    if (!publicId) {
+      document.getElementById("error").textContent =
+        "No se proporcionó un Memory Bit.";
+      throw new Error("No publicId");
+    }
+
+    // 2. Pedir la Memory Bit al backend
+   fetch(`/api/memory-bits/${publicId}`)
+      .then(res => {
+        if (!res.ok) throw new Error("No encontrada");
+        return res.json();
+      })
+      .then(data => {
+        document.getElementById("title").textContent = data.title;
+        document.getElementById("content").textContent = data.content;
+        document.body.style.color = data.textColor || "black";
+      })
+      .catch(() => {
+        document.getElementById("error").textContent =
+          "Memory Bit no encontrada.";
+        document.getElementById("title").textContent = "Error";
+      });
+  </script>
+
+</body>
+</html>

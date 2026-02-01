@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crear Memory Bit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: white;
+      width: 90%;
+      max-width: 420px;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: black;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #result {
+      margin-top: 20px;
+      text-align: center;
+      display: none;
+    }
+
+    #qr {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    a {
+      word-break: break-all;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>Crear Memory Bit</h1>
+
+    <input id="title" placeholder="Título" maxlength="120" />
+    <textarea id="content" placeholder="Contenido" maxlength="1000"></textarea>
+
+    <select id="textColor">
+      <option value="black">Negro</option>
+      <option value="blue">Azul</option>
+      <option value="green">Verde</option>
+      <option value="pink">Rosa</option>
+    </select>
+
+    <button id="createBtn">Crear Memory Bit</button>
+
+    <div id="result">
+      <p><strong>Link público:</strong></p>
+      <a id="link" href="#" target="_blank"></a>
+
+      <div id="qr"></div>
+
+      <button id="downloadQR">Descargar QR</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("createBtn").onclick = async () => {
+      const title = document.getElementById("title").value.trim();
+      const content = document.getElementById("content").value.trim();
+      const textColor = document.getElementById("textColor").value;
+
+      if (!title || !content) {
+        alert("Completa todos los campos");
+        return;
+      }
+
+      const body = {
+        title,
+        searchTitle: title.toLowerCase(),
+        content,
+        textColor,
+        codeUsed: Math.random().toString(36).slice(2, 8).toUpperCase(),
+        publicId: Math.random().toString(36).slice(2, 14)
+      };
+
+      const res = await fetch("/api/memory-bits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      const publicUrl = `${window.location.origin}/${data.data.publicId}`;
+
+      document.getElementById("result").style.display = "block";
+
+      const linkEl = document.getElementById("link");
+      linkEl.href = publicUrl;
+      linkEl.textContent = publicUrl;
+
+      const qrContainer = document.getElementById("qr");
+      qrContainer.innerHTML = "";
+
+      const canvas = document.createElement("canvas");
+
+      QRCode.toCanvas(canvas, publicUrl, { width: 200 }, () => {
+        qrContainer.appendChild(canvas);
+
+        document.getElementById("downloadQR").onclick = () => {
+          const a = document.createElement("a");
+          a.download = `memory-bit-${data.data.publicId}.png`;
+          a.href = canvas.toDataURL("image/png");
+          a.click();
+        };
+      });
+    };
+  </script>
+
+</body>
+</html>
