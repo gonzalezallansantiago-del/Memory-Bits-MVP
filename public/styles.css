@@ -112,3 +112,18 @@ button:active {
     transform: translateY(0);
   }
 }
+
+/* ===== FORM FIX (CENTRADO REAL) ===== */
+
+.card {
+  align-items: stretch; /* ← este es el cambio clave */
+}
+
+.card input,
+.card textarea,
+.card select {
+  display: block;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
