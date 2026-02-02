@@ -125,31 +125,36 @@ if (!codeUsed) {
 
       const publicId = generatePublicId();
 
-      fetch("/api/memory-bits", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          title,
-          content,
-          textColor,
-          codeUsed,
-          publicId
-        })
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Error al crear");
-        return res.json();
-      })
-      .then(() => {
-        sessionStorage.removeItem("memoryBitCode");
-        window.location.href = `/${publicId}`;
-      })
-      .catch(() => {
-        document.getElementById("error").textContent =
-          "No se pudo crear la Memory Bit.";
-      });
+fetch("/api/memory-bits", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "x-admin-secret": "miclavesupersecreta123"
+  },
+  body: JSON.stringify({
+    title,
+    content,
+    textColor,
+    codeUsed,
+    publicId
+  })
+})
+.then(async res => {
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
+  return res.json();
+})
+.then(() => {
+  sessionStorage.removeItem("memoryBitCode");
+  window.location.href = `/${publicId}`;
+})
+.catch(err => {
+  console.error("ERROR REAL:", err.message);
+  document.getElementById("error").textContent =
+    err.message || "No se pudo crear la Memory Bit.";
+});
     }
   </script>
 
