@@ -127,3 +127,10 @@ button:active {
   margin-left: auto;
   margin-right: auto;
 }
+
+.card input,
+.card textarea,
+.card select {
+  margin-left: -4px;
+  margin-right: -4px;
+}
