@@ -27,16 +27,22 @@ body {
   box-shadow:
     0 4px 12px rgba(0,0,0,0.05),
     0 20px 40px rgba(0,0,0,0.08);
-  text-align: left;
   animation: fadeIn 0.5s ease-out;
+
+  /* 👇 CLAVE PARA CENTRADO */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* ===== TITLE ===== */
-#title {
+#title,
+h1 {
   font-size: 22px;
   font-weight: 600;
   margin: 0 0 16px 0;
   color: #000000;
+  text-align: center;
 }
 
 /* ===== CONTENT ===== */
@@ -46,10 +52,28 @@ body {
   white-space: pre-wrap;
 }
 
+/* ===== FORM ELEMENTS ===== */
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 14px;
+  border: 1px solid #d1d1d6;
+  font-size: 16px;
+  background: #ffffff;
+  color: #000000;
+
+  /* 👇 ESTO ARREGLA EL PROBLEMA VISUAL */
+  align-self: stretch;
+}
+
 /* ===== ERROR ===== */
 .error {
   color: #ff3b30;
   margin-top: 12px;
+  text-align: center;
 }
 
 /* ===== QR ===== */
