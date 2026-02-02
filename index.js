@@ -1,11 +1,15 @@
 const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors");
 const connectDB = require("./config/db.js");
 
 dotenv.config();
 
 const app = express();
+
+// ✅ HABILITAR CORS (CLAVE PARA POST EN PRODUCCIÓN)
+app.use(cors());
 
 // 🔗 Conectar a MongoDB
 connectDB();
