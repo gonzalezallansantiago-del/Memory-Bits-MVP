@@ -56,6 +56,14 @@
       height: 140px;
     }
 
+    #wordCounter {
+      text-align: right;
+      font-size: 13px;
+      color: #666;
+      margin-top: -12px;
+      margin-bottom: 18px;
+    }
+
     button {
       width: 100%;
       padding: 16px;
@@ -87,6 +95,8 @@
     <label>Texto (máx. 100 palabras)</label>
     <textarea id="content" placeholder="Escribe aquí..."></textarea>
 
+    <div id="wordCounter">0 / 100 palabras</div>
+
     <label>Color del texto</label>
     <select id="color">
       <option value="black">Negro</option>
@@ -103,10 +113,27 @@
   <script>
     const codeUsed = sessionStorage.getItem("memoryBitCode");
 
-if (!codeUsed) {
-  // 🔐 Sin código no se puede crear
-  window.location.href = "create-code.html";
-}
+    if (!codeUsed) {
+      window.location.href = "create-code.html";
+    }
+
+    const textarea = document.getElementById("content");
+    const counter = document.getElementById("wordCounter");
+    const MAX_WORDS = 100;
+
+    textarea.addEventListener("input", () => {
+      let words = textarea.value
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+      if (words.length > MAX_WORDS) {
+        words = words.slice(0, MAX_WORDS);
+        textarea.value = words.join(" ");
+      }
+
+      counter.textContent = `${words.length} / ${MAX_WORDS} palabras`;
+    });
 
     function generatePublicId() {
       return Math.random().toString(36).substring(2, 10);
@@ -114,7 +141,7 @@ if (!codeUsed) {
 
     function createMemoryBit() {
       const title = document.getElementById("title").value.trim();
-      const content = document.getElementById("content").value.trim();
+      const content = textarea.value.trim();
       const textColor = document.getElementById("color").value;
 
       if (!title || !content) {
@@ -125,38 +152,13 @@ if (!codeUsed) {
 
       const publicId = generatePublicId();
 
-fetch("/api/memory-bits", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "x-admin-secret": "miclavesupersecreta123"
-  },
-  body: JSON.stringify({
-    title,
-    content,
-    textColor,
-    codeUsed,
-    publicId
-  })
-})
-.then(async res => {
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text);
-  }
-  return res.json();
-})
-.then(() => {
-  sessionStorage.removeItem("memoryBitCode");
-  window.location.href = `/${publicId}`;
-})
-.catch(err => {
-  console.error("ERROR REAL:", err.message);
-  document.getElementById("error").textContent =
-    err.message || "No se pudo crear la Memory Bit.";
-});
-    }
-  </script>
-
-</body>
-</html>
+      fetch("/api/memory-bits", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title,
+          content,
+          textColor,
+          code

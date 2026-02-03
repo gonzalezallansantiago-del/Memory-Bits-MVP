@@ -8,6 +8,9 @@
   <!-- Librería QR -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
+  <!-- Librería PNG -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -61,13 +64,14 @@
       color: white;
       font-size: 14px;
       cursor: pointer;
+      width: 100%;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="card">
+  <div class="card" id="memoryCard">
     <h1 id="title">Cargando…</h1>
     <p id="content"></p>
     <p id="error" class="error"></p>
@@ -76,6 +80,10 @@
 
     <button id="downloadQR" style="display:none;">
       Descargar QR
+    </button>
+
+    <button id="downloadPNG" style="display:none;">
+      Descargar tarjeta (PNG)
     </button>
   </div>
 
@@ -103,6 +111,7 @@
 
         const url = `${window.location.origin}/${data.publicId}`;
 
+        /* ===== QR ===== */
         const qrContainer = document.getElementById("qr");
         qrContainer.innerHTML = "";
 
@@ -113,16 +122,32 @@
 
           qrContainer.appendChild(canvas);
 
-          const btn = document.getElementById("downloadQR");
-          btn.style.display = "block";
+          const btnQR = document.getElementById("downloadQR");
+          btnQR.style.display = "block";
 
-          btn.onclick = () => {
+          btnQR.onclick = () => {
             const link = document.createElement("a");
-            link.download = `memory-bit-${data.publicId}.png`;
+            link.download = `memory-bit-${data.publicId}-qr.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
           };
         });
+
+        /* ===== PNG TARJETA ===== */
+        const btnPNG = document.getElementById("downloadPNG");
+        btnPNG.style.display = "block";
+
+        btnPNG.onclick = () => {
+          html2canvas(document.getElementById("memoryCard"), {
+            backgroundColor: "#ffffff",
+            scale: 2
+          }).then(canvas => {
+            const link = document.createElement("a");
+            link.download = `memory-bit-${data.publicId}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+          });
+        };
       })
       .catch(() => {
         document.getElementById("error").textContent =
