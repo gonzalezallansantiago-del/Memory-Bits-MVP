@@ -10,17 +10,12 @@ const CodeSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  cardId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Card",
-    default: null
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
   usedAt: {
     type: Date,
+    default: null
+  },
+  publicId: {
+    type: String,
     default: null
   }
 });
