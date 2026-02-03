@@ -139,7 +139,8 @@
       return Math.random().toString(36).substring(2, 10);
     }
 
-    function createMemoryBit() {
+    // ✅ FUNCIÓN EXPUESTA GLOBALMENTE
+    window.createMemoryBit = function () {
       const title = document.getElementById("title").value.trim();
       const content = textarea.value.trim();
       const textColor = document.getElementById("color").value;
@@ -155,10 +156,34 @@
       fetch("/api/memory-bits", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "x-admin-secret": "miclavesupersecreta123"
         },
         body: JSON.stringify({
           title,
           content,
           textColor,
-          code
+          codeUsed,
+          publicId
+        })
+      })
+      .then(async res => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text);
+        }
+        return res.json();
+      })
+      .then(() => {
+        sessionStorage.removeItem("memoryBitCode");
+        window.location.href = `/${publicId}`;
+      })
+      .catch(err => {
+        document.getElementById("error").textContent =
+          err.message || "No se pudo crear la Memory Bit.";
+      });
+    };
+  </script>
+
+</body>
+</html>
