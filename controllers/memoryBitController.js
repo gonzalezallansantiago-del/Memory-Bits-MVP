@@ -2,30 +2,41 @@ const MemoryBit = require("../models/MemoryBit");
 const Code = require("../models/Code");
 
 /**
- * 🔒 Crear Memory Bit
- * Regla: 1 código = 1 tarjeta
+ * Crear Memory Bit (SEGURA, basada SOLO en código)
  */
 exports.createMemoryBit = async (req, res) => {
   try {
-    const { title, content, textColor, codeUsed, publicId } = req.body;
+    const {
+      title,
+      content,
+      textColor,
+      codeUsed,
+      publicId
+    } = req.body;
 
-    // Validación mínima
+    // 1️⃣ Validación básica
     if (!title || !content || !codeUsed || !publicId) {
-      return res.status(400).json({ message: "Faltan campos obligatorios" });
+      return res.status(400).json({
+        message: "Faltan campos obligatorios"
+      });
     }
 
-    // 🔐 Validar código
+    // 2️⃣ Verificar código
     const codeRecord = await Code.findOne({ code: codeUsed });
 
     if (!codeRecord) {
-      return res.status(400).json({ message: "Código inválido" });
+      return res.status(400).json({
+        message: "Código inválido"
+      });
     }
 
     if (codeRecord.used) {
-      return res.status(400).json({ message: "Este código ya fue usado" });
+      return res.status(400).json({
+        message: "Este código ya fue utilizado"
+      });
     }
 
-    // Crear Memory Bit
+    // 3️⃣ Crear Memory Bit
     const memoryBit = await MemoryBit.create({
       title,
       searchTitle: title.toLowerCase(),
@@ -35,20 +46,25 @@ exports.createMemoryBit = async (req, res) => {
       publicId
     });
 
-    // 🔒 Marcar código como usado
+    // 4️⃣ Marcar código como usado
     codeRecord.used = true;
     codeRecord.usedAt = new Date();
     codeRecord.publicId = publicId;
     await codeRecord.save();
 
-    res.status(201).json(memoryBit);
+    res.status(201).json({
+      message: "Memory Bit creada",
+      data: memoryBit
+    });
+
   } catch (error) {
+    console.error("ERROR createMemoryBit:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
 /**
- * 📄 Obtener tarjeta pública por publicId
+ * Obtener Memory Bit por publicId (PÚBLICA)
  */
 exports.getMemoryBitByPublicId = async (req, res) => {
   try {
@@ -65,41 +81,50 @@ exports.getMemoryBitByPublicId = async (req, res) => {
     }
 
     res.json(memoryBit);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
 /**
- * 🔍 Buscar Memory Bits (público)
+ * Buscar Memory Bits (opcional / admin / futuro)
  */
 exports.searchMemoryBits = async (req, res) => {
   try {
     const { q } = req.query;
 
     if (!q) {
-      return res.status(400).json({ message: "Falta el parámetro de búsqueda" });
+      return res.status(400).json({
+        message: "Falta el parámetro de búsqueda"
+      });
     }
 
     const searchRegex = new RegExp(q, "i");
 
     const results = await MemoryBit.find({
-      title: searchRegex
+      $or: [
+        { title: searchRegex },
+        { searchTitle: searchRegex },
+        { content: searchRegex }
+      ]
     }).sort({ createdAt: -1 });
 
     res.json(results);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
 /**
- * 🔐 ADMIN — Generar códigos
+ * 🔐 Generar códigos (ADMIN)
  */
 exports.generateCodes = async (req, res) => {
   try {
     const secret = req.headers["x-admin-secret"];
-    if (secret !== process.env.ADMIN_SECRET) {
+
+    if (!secret || secret !== process.env.ADMIN_SECRET) {
       return res.status(401).json({ message: "No autorizado" });
     }
 
@@ -117,6 +142,33 @@ exports.generateCodes = async (req, res) => {
     }
 
     res.json({ codes });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * 🔎 Validar código (ANTES de crear tarjeta)
+ */
+exports.validateCode = async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return res.status(400).json({ message: "Código requerido" });
+    }
+
+    const codeRecord = await Code.findOne({ code });
+
+    if (!codeRecord) {
+      return res.status(400).json({ message: "Código inválido" });
+    }
+
+    if (codeRecord.used) {
+      return res.status(400).json({ message: "Este código ya fue usado" });
+    }
+
+    res.json({ valid: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
