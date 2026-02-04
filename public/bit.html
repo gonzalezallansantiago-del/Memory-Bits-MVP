@@ -66,6 +66,17 @@
       cursor: pointer;
       width: 100%;
     }
+
+    /* ===== PASO 1: ocultar botones al exportar ===== */
+    .hide-for-export {
+      display: none !important;
+    }
+
+    /* Botón secundario */
+    #goHome {
+      background: #e5e5ea;
+      color: #000;
+    }
   </style>
 </head>
 
@@ -84,6 +95,11 @@
 
     <button id="downloadPNG" style="display:none;">
       Descargar tarjeta (PNG)
+    </button>
+
+    <!-- PASO 2: botón volver al home -->
+    <button id="goHome">
+      Volver a Memory Bits
     </button>
   </div>
 
@@ -115,12 +131,12 @@
         const qrContainer = document.getElementById("qr");
         qrContainer.innerHTML = "";
 
-        const canvas = document.createElement("canvas");
+        const qrCanvas = document.createElement("canvas");
 
-        QRCode.toCanvas(canvas, url, { width: 200 }, (err) => {
+        QRCode.toCanvas(qrCanvas, url, { width: 200 }, (err) => {
           if (err) return;
 
-          qrContainer.appendChild(canvas);
+          qrContainer.appendChild(qrCanvas);
 
           const btnQR = document.getElementById("downloadQR");
           btnQR.style.display = "block";
@@ -128,25 +144,45 @@
           btnQR.onclick = () => {
             const link = document.createElement("a");
             link.download = `memory-bit-${data.publicId}-qr.png`;
-            link.href = canvas.toDataURL("image/png");
+            link.href = qrCanvas.toDataURL("image/png");
             link.click();
           };
         });
 
-        /* ===== PNG TARJETA ===== */
+        /* ===== PNG TARJETA (PASO 1 aplicado) ===== */
         const btnPNG = document.getElementById("downloadPNG");
         btnPNG.style.display = "block";
 
-        btnPNG.onclick = () => {
-          html2canvas(document.getElementById("memoryCard"), {
+        btnPNG.onclick = async () => {
+          const card = document.getElementById("memoryCard");
+          const btnQR = document.getElementById("downloadQR");
+          const btnPNG = document.getElementById("downloadPNG");
+          const btnHome = document.getElementById("goHome");
+
+          // Ocultar botones
+          btnQR.classList.add("hide-for-export");
+          btnPNG.classList.add("hide-for-export");
+          btnHome.classList.add("hide-for-export");
+
+          const canvas = await html2canvas(card, {
             backgroundColor: "#ffffff",
             scale: 2
-          }).then(canvas => {
-            const link = document.createElement("a");
-            link.download = `memory-bit-${data.publicId}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
           });
+
+          // Restaurar botones
+          btnQR.classList.remove("hide-for-export");
+          btnPNG.classList.remove("hide-for-export");
+          btnHome.classList.remove("hide-for-export");
+
+          const link = document.createElement("a");
+          link.download = `memory-bit-${data.publicId}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        };
+
+        /* ===== PASO 2: volver al home ===== */
+        document.getElementById("goHome").onclick = () => {
+          window.location.href = "/";
         };
       })
       .catch(() => {
