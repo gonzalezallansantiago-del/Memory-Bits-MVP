@@ -43,6 +43,13 @@
     p {
       font-size: 16px;
       line-height: 1.5;
+      word-break: break-word;
+    }
+
+    a {
+      color: #007aff;
+      text-decoration: underline;
+      word-break: break-all;
     }
 
     .error {
@@ -67,7 +74,7 @@
       width: 100%;
     }
 
-    /* ===== PASO 1: ocultar botones al exportar ===== */
+    /* Ocultar botones al exportar PNG */
     .hide-for-export {
       display: none !important;
     }
@@ -97,7 +104,6 @@
       Descargar tarjeta (PNG)
     </button>
 
-    <!-- PASO 2: botón volver al home -->
     <button id="goHome">
       Volver a Memory Bits
     </button>
@@ -118,12 +124,19 @@
         return res.json();
       })
       .then(data => {
+        // Título
         document.getElementById("title").textContent = data.title;
-        document.getElementById("content").textContent = data.content;
 
-        // 🎨 Color SOLO para el cuerpo
-        document.getElementById("content").style.color =
-          data.textColor || "black";
+        // Contenido con links clickeables
+        const contentEl = document.getElementById("content");
+        const linkedText = data.content.replace(
+          /(https?:\/\/[^\s]+)/g,
+          '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+        );
+        contentEl.innerHTML = linkedText;
+
+        // Color solo para el cuerpo
+        contentEl.style.color = data.textColor || "black";
 
         const url = `${window.location.origin}/${data.publicId}`;
 
@@ -149,14 +162,13 @@
           };
         });
 
-        /* ===== PNG TARJETA (PASO 1 aplicado) ===== */
+        /* ===== PNG TARJETA ===== */
         const btnPNG = document.getElementById("downloadPNG");
         btnPNG.style.display = "block";
 
         btnPNG.onclick = async () => {
           const card = document.getElementById("memoryCard");
           const btnQR = document.getElementById("downloadQR");
-          const btnPNG = document.getElementById("downloadPNG");
           const btnHome = document.getElementById("goHome");
 
           // Ocultar botones
@@ -180,7 +192,7 @@
           link.click();
         };
 
-        /* ===== PASO 2: volver al home ===== */
+        /* ===== Volver al Home ===== */
         document.getElementById("goHome").onclick = () => {
           window.location.href = "/";
         };
