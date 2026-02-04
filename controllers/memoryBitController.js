@@ -173,3 +173,27 @@ exports.validateCode = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+/**
+ * Validar código (PÚBLICO)
+ */
+exports.validateCode = async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    const codeRecord = await Code.findOne({ code });
+
+    if (!codeRecord) {
+      return res.status(400).json({ message: "Código inválido." });
+    }
+
+    if (codeRecord.used) {
+      return res.status(400).json({ message: "Este código ya fue usado." });
+    }
+
+    res.json({ valid: true });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error validando el código." });
+  }
+};

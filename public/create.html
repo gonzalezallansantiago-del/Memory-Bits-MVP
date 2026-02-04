@@ -139,7 +139,7 @@
       return Math.random().toString(36).substring(2, 10);
     }
 
-    // ✅ FUNCIÓN EXPUESTA GLOBALMENTE
+    // ✅ FUNCIÓN GLOBAL
     window.createMemoryBit = function () {
       const title = document.getElementById("title").value.trim();
       const content = textarea.value.trim();
@@ -156,8 +156,7 @@
       fetch("/api/memory-bits", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "x-admin-secret": "miclavesupersecreta123"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           title,

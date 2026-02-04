@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Crear Memory Bit</title>
+  <title>Accede con tu código</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
@@ -40,6 +40,9 @@
       border: 1px solid #ccc;
       font-size: 16px;
       margin-top: 16px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
 
     button {
@@ -56,7 +59,8 @@
 
     .error {
       color: red;
-      margin-top: 12px;
+      margin-top: 14px;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -66,30 +70,44 @@
   <div class="card">
     <h1>Accede con tu código</h1>
 
-    <input id="codeInput" placeholder="Código" />
+    <input id="codeInput" placeholder="CÓDIGO" />
 
     <button onclick="continueFlow()">Continuar</button>
 
     <div id="error" class="error"></div>
   </div>
 
-  <script>
-    function continueFlow() {
-      const code = document.getElementById("codeInput").value.trim();
+<script>
+  async function continueFlow() {
+    const code = document.getElementById("codeInput").value.trim();
+    const errorBox = document.getElementById("error");
 
-      if (!code) {
-        document.getElementById("error").textContent =
-          "Ingresa un código válido";
+    errorBox.textContent = "";
+
+    if (!code) {
+      errorBox.textContent = "Ingresa un código válido.";
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/memory-bits/validate-code/${code}`);
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorBox.textContent = data.message || "Código inválido.";
         return;
       }
 
-      // Guardamos el código temporalmente
+      // ✅ Código válido → guardamos y continuamos
       sessionStorage.setItem("memoryBitCode", code);
-
-      // Pasamos a crear la tarjeta
       window.location.href = "create.html";
+
+    } catch (err) {
+      errorBox.textContent = "Error al validar el código. Intenta de nuevo.";
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>

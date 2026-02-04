@@ -5,19 +5,35 @@ const {
   createMemoryBit,
   getMemoryBitByPublicId,
   searchMemoryBits,
-  generateCodes
+  generateCodes,
+  validateCode
 } = require("../controllers/memoryBitController");
 
-// 🔐 ADMIN — generar códigos
+/* ===============================
+   🔐 ADMIN — generar códigos
+   =============================== */
 router.get("/admin/generate-codes", generateCodes);
 
-// ➕ Crear nueva Memory Bit
+/* ===============================
+   🔎 Validar código (PÚBLICO)
+   ⚠️ Debe ir ANTES de /:publicId
+   =============================== */
+router.get("/validate-code/:code", validateCode);
+
+/* ===============================
+   ➕ Crear nueva Memory Bit
+   =============================== */
 router.post("/", createMemoryBit);
 
-// 🔍 Buscar Memory Bits
+/* ===============================
+   🔍 Buscar Memory Bits
+   (⚠️ SIEMPRE antes del :publicId)
+   =============================== */
 router.get("/search", searchMemoryBits);
 
-// 📄 Obtener Memory Bit por publicId
+/* ===============================
+   📄 Obtener Memory Bit pública
+   =============================== */
 router.get("/:publicId", getMemoryBitByPublicId);
 
 module.exports = router;
