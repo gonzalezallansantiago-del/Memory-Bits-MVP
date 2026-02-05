@@ -33,23 +33,25 @@
       font-weight: 700;
     }
 
-    input {
+    input,
+    button {
       width: 100%;
-      padding: 12px;
-      border-radius: 10px;
+      box-sizing: border-box;
+    }
+
+    input {
+      padding: 14px;
+      border-radius: 12px;
       border: 1px solid #ccc;
       font-size: 16px;
       margin-top: 16px;
       text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 2px;
     }
 
     button {
       margin-top: 20px;
-      padding: 12px;
-      width: 100%;
-      border-radius: 12px;
+      padding: 14px;
+      border-radius: 14px;
       border: none;
       background: black;
       color: white;
@@ -59,7 +61,7 @@
 
     .error {
       color: red;
-      margin-top: 14px;
+      margin-top: 12px;
       font-size: 14px;
     }
   </style>
@@ -70,27 +72,29 @@
   <div class="card">
     <h1>Accede con tu código</h1>
 
-    <input id="codeInput" placeholder="CÓDIGO" />
+    <input id="codeInput" placeholder="Código" />
 
     <button onclick="continueFlow()">Continuar</button>
 
     <div id="error" class="error"></div>
   </div>
 
-<script>
-  async function continueFlow() {
-    const code = document.getElementById("codeInput").value.trim();
-    const errorBox = document.getElementById("error");
+  <script>
+    async function continueFlow() {
+      const code = document.getElementById("codeInput").value.trim();
+      const errorBox = document.getElementById("error");
 
-    errorBox.textContent = "";
+      if (!code) {
+        errorBox.textContent = "Ingresa un código válido.";
+        return;
+      }
 
-    if (!code) {
-      errorBox.textContent = "Ingresa un código válido.";
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/memory-bits/validate-code/${code}`);
+      // 🔎 Validar código con el backend
+      const res = await fetch("/api/memory-bits/validate-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      });
 
       const data = await res.json();
 
@@ -99,15 +103,10 @@
         return;
       }
 
-      // ✅ Código válido → guardamos y continuamos
       sessionStorage.setItem("memoryBitCode", code);
       window.location.href = "create.html";
-
-    } catch (err) {
-      errorBox.textContent = "Error al validar el código. Intenta de nuevo.";
     }
-  }
-</script>
+  </script>
 
 </body>
 </html>
