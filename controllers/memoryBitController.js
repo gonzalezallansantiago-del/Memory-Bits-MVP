@@ -88,7 +88,7 @@ exports.getMemoryBitByPublicId = async (req, res) => {
 };
 
 /**
- * Buscar Memory Bits (opcional / admin / futuro)
+ * Buscar Memory Bits (SOLO por título)
  */
 exports.searchMemoryBits = async (req, res) => {
   try {
@@ -102,12 +102,9 @@ exports.searchMemoryBits = async (req, res) => {
 
     const searchRegex = new RegExp(q, "i");
 
+    // ✅ CAMBIO ÚNICO: búsqueda solo por searchTitle
     const results = await MemoryBit.find({
-      $or: [
-        { title: searchRegex },
-        { searchTitle: searchRegex },
-        { content: searchRegex }
-      ]
+      searchTitle: searchRegex
     }).sort({ createdAt: -1 });
 
     res.json(results);
