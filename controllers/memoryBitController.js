@@ -14,29 +14,22 @@ exports.createMemoryBit = async (req, res) => {
       publicId
     } = req.body;
 
-    // 1️⃣ Validación básica
     if (!title || !content || !codeUsed || !publicId) {
       return res.status(400).json({
         message: "Faltan campos obligatorios"
       });
     }
 
-    // 2️⃣ Verificar código
     const codeRecord = await Code.findOne({ code: codeUsed });
 
     if (!codeRecord) {
-      return res.status(400).json({
-        message: "Código inválido"
-      });
+      return res.status(400).json({ message: "Código inválido" });
     }
 
     if (codeRecord.used) {
-      return res.status(400).json({
-        message: "Este código ya fue utilizado"
-      });
+      return res.status(400).json({ message: "Este código ya fue utilizado" });
     }
 
-    // 3️⃣ Crear Memory Bit
     const memoryBit = await MemoryBit.create({
       title,
       searchTitle: title.toLowerCase(),
@@ -46,7 +39,6 @@ exports.createMemoryBit = async (req, res) => {
       publicId
     });
 
-    // 4️⃣ Marcar código como usado
     codeRecord.used = true;
     codeRecord.usedAt = new Date();
     codeRecord.publicId = publicId;
@@ -102,7 +94,6 @@ exports.searchMemoryBits = async (req, res) => {
 
     const searchRegex = new RegExp(q, "i");
 
-    // ✅ CAMBIO ÚNICO: búsqueda solo por searchTitle
     const results = await MemoryBit.find({
       searchTitle: searchRegex
     }).sort({ createdAt: -1 });
@@ -145,34 +136,7 @@ exports.generateCodes = async (req, res) => {
 };
 
 /**
- * 🔎 Validar código (ANTES de crear tarjeta)
- */
-exports.validateCode = async (req, res) => {
-  try {
-    const { code } = req.body;
-
-    if (!code) {
-      return res.status(400).json({ message: "Código requerido" });
-    }
-
-    const codeRecord = await Code.findOne({ code });
-
-    if (!codeRecord) {
-      return res.status(400).json({ message: "Código inválido" });
-    }
-
-    if (codeRecord.used) {
-      return res.status(400).json({ message: "Este código ya fue usado" });
-    }
-
-    res.json({ valid: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-/**
- * Validar código (PÚBLICO)
+ * 🔎 Validar código (PÚBLICO)
  */
 exports.validateCode = async (req, res) => {
   try {
