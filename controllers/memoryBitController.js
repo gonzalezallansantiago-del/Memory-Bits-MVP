@@ -1,5 +1,6 @@
 const MemoryBit = require("../models/MemoryBit");
 const Code = require("../models/Code");
+const crypto = require("crypto"); // ✅ agregado
 
 /**
  * Crear Memory Bit (SEGURA, basada SOLO en código)
@@ -120,16 +121,17 @@ exports.generateCodes = async (req, res) => {
     const codes = [];
 
     for (let i = 0; i < amount; i++) {
-      const code = Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase();
+
+      // ✅ generación segura
+      const randomPart = crypto.randomBytes(4).toString("hex").toUpperCase();
+      const code = `MB-ORGN-${randomPart}`;
 
       const newCode = await Code.create({ code });
       codes.push(newCode.code);
     }
 
     res.json({ codes });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
