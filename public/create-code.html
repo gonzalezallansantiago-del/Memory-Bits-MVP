@@ -46,6 +46,7 @@
       font-size: 16px;
       margin-top: 16px;
       text-align: center;
+      text-transform: uppercase;
     }
 
     button {
@@ -72,18 +73,46 @@
   <div class="card">
     <h1>Accede con tu código</h1>
 
-    <input id="codeInput" placeholder="Código" />
+    <!-- ✅ FORM agregado -->
+    <form id="codeForm">
 
-    <button onclick="continueFlow()">Continuar</button>
+      <input
+        id="codeInput"
+        placeholder="Código"
+        autocomplete="off"
+      />
+
+      <button type="submit">Continuar</button>
+
+    </form>
 
     <div id="error" class="error"></div>
+
   </div>
 
 <script>
-  async function continueFlow() {
-    const code = document.getElementById("codeInput").value.trim();
-    const errorBox = document.getElementById("error");
 
+  const form = document.getElementById("codeForm");
+  const input = document.getElementById("codeInput");
+
+  // ✅ forzar mayúsculas mientras escribe
+  input.addEventListener("input", () => {
+    input.value = input.value.toUpperCase();
+  });
+
+  form.addEventListener("submit", continueFlow);
+
+  async function continueFlow(event) {
+
+    event.preventDefault();
+
+    const code = input
+      .value
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, "");
+
+    const errorBox = document.getElementById("error");
     errorBox.textContent = "";
 
     if (!code) {
@@ -92,8 +121,9 @@
     }
 
     try {
+
       const res = await fetch(
-        `/api/memory-bits/validate-code/${encodeURIComponent(code)}`
+        `https://memory-bits-mvp.onrender.com/api/memory-bits/validate-code/${encodeURIComponent(code)}`
       );
 
       const data = await res.json();
@@ -111,6 +141,7 @@
       errorBox.textContent = "Error al validar el código. Intenta de nuevo.";
     }
   }
+
 </script>
 
 </body>

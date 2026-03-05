@@ -1,6 +1,6 @@
 const MemoryBit = require("../models/MemoryBit");
 const Code = require("../models/Code");
-const crypto = require("crypto"); // ✅ agregado
+const crypto = require("crypto");
 
 // 🔐 función para hash de códigos
 function hashCode(code) {
@@ -8,6 +8,14 @@ function hashCode(code) {
     .createHash("sha256")
     .update(code)
     .digest("hex");
+}
+
+// 🔐 limpiar código antes de hashear
+function normalizeCode(code) {
+  return code
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .trim();
 }
 
 /**
@@ -29,8 +37,9 @@ exports.createMemoryBit = async (req, res) => {
       });
     }
 
-    // 🔐 convertir código a hash antes de buscar
-    const hashedInput = hashCode(codeUsed);
+    // 🔐 normalizar y hashear
+    const normalizedCode = normalizeCode(codeUsed);
+    const hashedInput = hashCode(normalizedCode);
 
     const codeRecord = await Code.findOne({ code: hashedInput });
 
@@ -47,7 +56,7 @@ exports.createMemoryBit = async (req, res) => {
       searchTitle: title.toLowerCase(),
       content,
       textColor,
-      codeUsed,
+      codeUsed: normalizedCode,
       publicId
     });
 
@@ -122,7 +131,6 @@ exports.searchMemoryBits = async (req, res) => {
  */
 exports.generateCodes = async (req, res) => {
 
-  // 🔒 NUEVO — ocultar endpoint en producción
   if (process.env.NODE_ENV === "production") {
     return res.status(404).json({ message: "Not found" });
   }
@@ -139,16 +147,13 @@ exports.generateCodes = async (req, res) => {
 
     for (let i = 0; i < amount; i++) {
 
-      // ✅ generación segura
       const randomPart = crypto.randomBytes(4).toString("hex").toUpperCase();
       const code = `MB-ORGN-${randomPart}`;
 
-      // 🔐 guardar SOLO el hash en la base de datos
       const hashedCode = hashCode(code);
 
-      const newCode = await Code.create({ code: hashedCode });
+      await Code.create({ code: hashedCode });
 
-      // devolver el código real al administrador
       codes.push(code);
     }
 
@@ -164,10 +169,9 @@ exports.generateCodes = async (req, res) => {
  */
 exports.validateCode = async (req, res) => {
   try {
-    const { code } = req.params;
 
-    // 🔐 convertir a hash antes de buscar
-    const hashedInput = hashCode(code);
+    const normalizedCode = normalizeCode(req.params.code);
+    const hashedInput = hashCode(normalizedCode);
 
     const codeRecord = await Code.findOne({ code: hashedInput });
 
