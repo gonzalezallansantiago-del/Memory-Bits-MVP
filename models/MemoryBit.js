@@ -26,15 +26,16 @@ const MemoryBitSchema = new mongoose.Schema({
     default: "black"
   },
 
-codeUsed: {
-  type: String,
-  required: true
-},
+  codeUsed: {
+    type: String,
+    required: true
+  },
 
   publicId: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    index: true // 🔒 NUEVO — índice para acceso rápido
   },
 
   createdAt: {

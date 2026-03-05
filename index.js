@@ -1,3 +1,5 @@
+const rateLimit = require("express-rate-limit");
+const crypto = require("crypto");
 const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
@@ -16,6 +18,16 @@ connectDB();
 
 // 📦 Middleware
 app.use(express.json());
+
+/* 🔒 NUEVO — Rate Limit para proteger la API */
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 30, // máximo 30 requests por IP
+  message: { message: "Demasiadas solicitudes. Intenta nuevamente en un minuto." }
+});
+
+/* 🔒 NUEVO — aplicar limitador a la API */
+app.use("/api/", apiLimiter);
 
 // 📂 Servir archivos estáticos
 app.use(express.static(path.join(__dirname, "public")));

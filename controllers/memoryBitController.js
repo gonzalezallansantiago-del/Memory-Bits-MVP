@@ -2,6 +2,14 @@ const MemoryBit = require("../models/MemoryBit");
 const Code = require("../models/Code");
 const crypto = require("crypto"); // ✅ agregado
 
+// 🔐 función para hash de códigos
+function hashCode(code) {
+  return crypto
+    .createHash("sha256")
+    .update(code)
+    .digest("hex");
+}
+
 /**
  * Crear Memory Bit (SEGURA, basada SOLO en código)
  */
@@ -21,7 +29,10 @@ exports.createMemoryBit = async (req, res) => {
       });
     }
 
-    const codeRecord = await Code.findOne({ code: codeUsed });
+    // 🔐 convertir código a hash antes de buscar
+    const hashedInput = hashCode(codeUsed);
+
+    const codeRecord = await Code.findOne({ code: hashedInput });
 
     if (!codeRecord) {
       return res.status(400).json({ message: "Código inválido" });
@@ -110,6 +121,12 @@ exports.searchMemoryBits = async (req, res) => {
  * 🔐 Generar códigos (ADMIN)
  */
 exports.generateCodes = async (req, res) => {
+
+  // 🔒 NUEVO — ocultar endpoint en producción
+  if (process.env.NODE_ENV === "production") {
+    return res.status(404).json({ message: "Not found" });
+  }
+
   try {
     const secret = req.headers["x-admin-secret"];
 
@@ -126,8 +143,13 @@ exports.generateCodes = async (req, res) => {
       const randomPart = crypto.randomBytes(4).toString("hex").toUpperCase();
       const code = `MB-ORGN-${randomPart}`;
 
-      const newCode = await Code.create({ code });
-      codes.push(newCode.code);
+      // 🔐 guardar SOLO el hash en la base de datos
+      const hashedCode = hashCode(code);
+
+      const newCode = await Code.create({ code: hashedCode });
+
+      // devolver el código real al administrador
+      codes.push(code);
     }
 
     res.json({ codes });
@@ -144,7 +166,10 @@ exports.validateCode = async (req, res) => {
   try {
     const { code } = req.params;
 
-    const codeRecord = await Code.findOne({ code });
+    // 🔐 convertir a hash antes de buscar
+    const hashedInput = hashCode(code);
+
+    const codeRecord = await Code.findOne({ code: hashedInput });
 
     if (!codeRecord) {
       return res.status(400).json({ message: "Código inválido." });
