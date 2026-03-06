@@ -123,8 +123,8 @@
     try {
 
       const res = await fetch(
-        `https://memory-bits-mvp.onrender.com/api/memory-bits/validate-code/${encodeURIComponent(code)}`
-      );
+      `/api/memory-bits/validate-code/${encodeURIComponent(code)}`
+     );
 
       const data = await res.json();
 
