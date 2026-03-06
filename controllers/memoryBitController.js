@@ -150,7 +150,7 @@ exports.generateCodes = async (req, res) => {
       const randomPart = crypto.randomBytes(4).toString("hex").toUpperCase();
       const code = `MB-ORGN-${randomPart}`;
 
-      const hashedCode = hashCode(code);
+      const hashedCode = hashCode(normalizeCode(code));
 
       await Code.create({ code: hashedCode });
 
