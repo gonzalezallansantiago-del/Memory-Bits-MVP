@@ -14,7 +14,7 @@ function hashCode(code) {
 function normalizeCode(code) {
   return code
     .toUpperCase()
-    .replace(/[\s-]+/g, "") // 🔧 CORRECCIÓN: elimina espacios y guiones
+    .replace(/[-\s]/g, "")
     .trim();
 }
 
