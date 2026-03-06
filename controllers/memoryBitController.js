@@ -131,9 +131,9 @@ exports.searchMemoryBits = async (req, res) => {
  */
 exports.generateCodes = async (req, res) => {
 
-  // if (process.env.NODE_ENV === "production") {
-  //   return res.status(404).json({ message: "Not found" });
-  // }
+  if (process.env.NODE_ENV === "production") {
+    return res.status(404).json({ message: "Not found" });
+  }
 
   try {
     const secret = req.headers["x-admin-secret"];
