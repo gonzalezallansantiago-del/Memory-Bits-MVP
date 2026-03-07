@@ -74,6 +74,12 @@
       width: 100%;
     }
 
+    .timestamp {
+      font-size: 12px;
+      color: #8e8e93;
+      margin-bottom: 10px;
+    }
+
     /* Ocultar botones al exportar PNG */
     .hide-for-export {
       display: none !important;
@@ -90,6 +96,7 @@
 <body>
 
   <div class="card" id="memoryCard">
+    <div class="timestamp" id="createdAt"></div>
     <h1 id="title">Cargando…</h1>
     <p id="content"></p>
     <p id="error" class="error"></p>
@@ -126,6 +133,21 @@
       .then(data => {
         // Título
         document.getElementById("title").textContent = data.title;
+
+        // Fecha de creación
+        if (data.createdAt) {
+        const date = new Date(data.createdAt);
+
+        const formatted = date.toLocaleString("es-ES", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+        });
+
+  document.getElementById("createdAt").textContent = formatted;
+}
 
         // Contenido con links clickeables
         const contentEl = document.getElementById("content");
